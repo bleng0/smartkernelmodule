@@ -45,7 +45,7 @@ The system operates as a pipeline: **kernel samples → EMA smoothing → spike 
 
 ### Detection Logic Flow
 
-The kernel module samples every process at 100ms intervals, computes smoothed metrics, and exposes spike predictions via `/proc/smartscheduler/predictions`. The Python TUI reads these predictions, cross-references against the blocklist, and takes action only when both conditions are met: **(1) the process name matches the blocklist AND (2) its CPU usage exceeds the configured threshold**.
+The kernel module samples every process at 100ms intervals, computes smoothed metrics, and exposes spike predictions via `/proc/smartscheduler/predictions`. The Python TUI uses **`psutil` as its primary source of truth** for process discovery (ensuring all running processes are captured even if the kernel module has stale data), then **enriches** each process with kernel-level EMA/RoC predictions. A process is flagged for termination only when both conditions are met: **(1) the process name matches the blocklist AND (2) its CPU usage exceeds the configured threshold**.
 
 ```mermaid
 flowchart TD
@@ -63,7 +63,7 @@ flowchart TD
     K -- No --> J
     K -- Yes --> L{"Process in safe_apps?"}
     L -- Yes --> J
-    L -- No --> M["🔴 Red Pulse Animation\n(2 second visual alarm)"]
+    L -- No --> M["🔴 Red Pulse Animation\n(4 second visual alarm: 2 × 2s cycles)"]
     M --> N["SIGTERM → wait 0.5s → SIGKILL"]
     N --> O["Refresh table\n(process removed)"]
 ```
@@ -123,6 +123,7 @@ SmartScheduler/
 │   └── test.sh
 ├── keys/                 # Kernel module signing (Secure Boot)
 ├── logs/                 # Runtime output (gitignored)
+├── DEMO_SCRIPT.txt       # Step-by-step demo walkthrough
 ├── .gitignore
 └── README.md
 ```
@@ -136,7 +137,7 @@ flowchart TD
     C --> D["Evaluate blocklist\nfor each process"]
     D --> E{"Any blocklisted\nprocess flagged?"}
     E -- No --> F["Render full layout\n(Header + Table + Advisory + Footer)"]
-    E -- Yes --> G["Red Pulse Animation\n8 frames × 0.25s = 2s cycle"]
+    E -- Yes --> G["Red Pulse Animation\n8 frames × 0.25s × 2 cycles = 4s"]
     G --> H["Frame loop:\nCycle bgcolor #bc330d ↔ #e33100"]
     H --> I["Send SIGTERM"]
     I --> J{"Process exited\nwithin 0.5s?"}
@@ -236,14 +237,17 @@ Options:
 {
     "blocklist": [
         {"name": "cryptominer", "cpu_threshold": 80},
-        {"name": "xmrig", "cpu_threshold": 50}
+        {"name": "xmrig", "cpu_threshold": 50},
+        {"name": "stress-ng", "cpu_threshold": 90},
+        {"name": "fork_bomb", "cpu_threshold": 30}
     ],
     "safe_apps": [
         "code", "chrome", "firefox", "gnome-shell", "systemd",
         "bash", "vim", "nvim", "python3", "docker"
     ],
     "global_cpu_kill_threshold": 95,
-    "kill_delay_seconds": 2
+    "kill_delay_seconds": 2,
+    "kill_signal_timeout": 0.5
 }
 ```
 
@@ -252,7 +256,8 @@ Options:
 | `blocklist` | Processes to monitor. Killed when CPU exceeds their threshold. |
 | `safe_apps` | Never killed, regardless of CPU usage. |
 | `global_cpu_kill_threshold` | Fallback threshold for unlisted processes (default: 95%). |
-| `kill_delay_seconds` | Duration of red-pulse animation before kill (default: 2s). |
+| `kill_delay_seconds` | Reserved for future use (default: 2s). Animation is currently 4s (2 × 2s pulse cycles). |
+| `kill_signal_timeout` | Time in seconds to wait for SIGTERM before sending SIGKILL (default: 0.5s). |
 
 ---
 
