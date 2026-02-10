@@ -1,0 +1,29 @@
+{
+    "blocklist": [
+        {"name": "cryptominer", "cpu_threshold": 80},
+        {"name": "xmrig", "cpu_threshold": 50},
+        {"name": "minerd", "cpu_threshold": 50},
+        {"name": "cpuminer", "cpu_threshold": 50},
+        {"name": "stress-ng", "cpu_threshold": 90},
+        {"name": "stress", "cpu_threshold": 90},
+        {"name": "yes", "cpu_threshold": 95},
+        {"name": "fork_bomb", "cpu_threshold": 30}
+    ],
+    "safe_apps": [
+        "code", "code-oss", "codium",
+        "chrome", "chromium", "firefox", "brave",
+        "gnome-shell", "gnome-terminal", "konsole", "alacritty", "kitty",
+        "Xorg", "Xwayland", "wayland", "mutter", "kwin",
+        "pulseaudio", "pipewire", "wireplumber",
+        "systemd", "journald", "dbus-daemon", "NetworkManager",
+        "bash", "zsh", "fish", "tmux", "screen",
+        "vim", "nvim", "emacs", "nano",
+        "python3", "node", "java", "cargo", "rustc", "gcc", "g++", "make",
+        "docker", "containerd", "kubelet",
+        "spotify", "slack", "discord", "telegram-desktop",
+        "nautilus", "dolphin", "thunar"
+    ],
+    "global_cpu_kill_threshold": 95,
+    "kill_delay_seconds": 2,
+    "kill_signal_timeout": 0.5
+}

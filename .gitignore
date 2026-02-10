@@ -1,0 +1,55 @@
+# Build artifacts - Kernel module
+kernel/*.ko
+kernel/*.o
+kernel/*.mod
+kernel/*.mod.c
+kernel/*.mod.o
+kernel/Module.symvers
+kernel/modules.order
+kernel/.tmp_versions/
+kernel/.*.cmd
+
+# Build artifacts - eBPF
+ebpf/.output/
+ebpf/*.o
+
+# Build artifacts - User-space compiled binaries
+user/monitor
+user/stress_test
+user/data_exporter
+user/scheduler_daemon
+user/health_check
+user/top_spikes
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Runtime logs
+logs/*.csv
+logs/*.log
+logs/*.txt
+logs/*.gp
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug/temp files
+debug.log
+stdout.log
+stderr.log
+cryptominer
+
+keys/
+

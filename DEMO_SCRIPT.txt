@@ -1,0 +1,82 @@
+SmartScheduler Presentation Demo Script
+
+TERMINAL 1 (Project Setup & Monitor)
+
+1. Cleanup and Build (Optional but recommended for clean slate)
+
+cd ~/Projects/SmartScheduler
+make clean
+./scripts/build.sh
+
+(Explain: Compiling kernel module and user-space tools from scratch)
+
+
+2. Load Kernel Module (CRITICAL STEP)
+
+sudo rmmod smartscheduler 2>/dev/null
+sudo insmod kernel/smartscheduler.ko
+
+cat /proc/smartscheduler/status
+
+(Explain: Module is now active and sampling processes every 100ms)
+
+
+3. Start Monitor (The New Python TUI)
+
+sudo python3 user/smartmonitor.py --interval 500
+
+(Show: System Overview header, Power State, Advisory panel)
+(Keep this terminal running and visible for the audience)
+
+
+
+TERMINAL 2 (Workload Generator)
+
+4. Demonstrate Safe App Protection
+
+cd ~/Projects/SmartScheduler
+
+# Generate high CPU load using Python
+python3 -c "while True: pass" &
+
+(Show in TERMINAL 1: 
+ - Process 'python3' appears with ~100% CPU.
+ - Status is SAFE (Green). 
+ - Explain: Python is whitelisted as a safe app, so it is never killed.)
+
+Cleanup:
+killall python3
+
+
+5. Demonstrate Blocklist Kill (Red Pulse Animation)
+
+# Create a fake "cryptominer" process using a system utility
+cp /bin/yes ./cryptominer
+
+# Run it (generates 100% CPU)
+./cryptominer > /dev/null &
+
+(Show in TERMINAL 1: 
+ - Process 'cryptominer' appears with >95% CPU.
+ - Matches blocklist entry.
+ - Row turns RED and pulses for 2 seconds.
+ - KILLED automatically.
+ - Advisory panel logs the kill action.)
+
+(Explain: The monitor detected a blocklisted process exceeding the threshold and terminated it to save resources.)
+
+
+6. Verify Process is Gone
+
+pgrep -a cryptominer
+(Should return nothing)
+
+
+
+TERMINAL 1 (Backup Demo Mode)
+
+7. If kernel module fails to load (Contingency):
+
+python3 user/smartmonitor.py --demo
+
+(Explain: Simulation mode with synthetic data for checking UI layout)
