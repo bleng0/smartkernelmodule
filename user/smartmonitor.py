@@ -350,14 +350,14 @@ def generate_demo_processes(tick: int) -> list[ProcessInfo]:
             ram_mb=round(ram + random.uniform(-50, 50), 1),
             cpu_roc=roc,
             mem_roc=random.randint(-100, 300),
-            io_roc=random.randint(-50, 200),
+            io_rate=random.randint(-50, 200),
             has_cpu_spike=blk,
             has_mem_spike=random.random() < 0.1,
             has_io_spike=random.random() < 0.05,
             is_blocklisted=blk,
         )
         # Derive alert level from ROC
-        max_roc = max(abs(p.cpu_roc), abs(p.mem_roc), abs(p.io_roc))
+        max_roc = max(abs(p.cpu_roc), abs(p.mem_roc), abs(int(p.io_rate)))
         if max_roc > 5000:
             p.alert_level = "CRITICAL"
         elif max_roc > 3000:
